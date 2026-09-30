@@ -2,10 +2,7 @@
 
 ## Problem Statement
 
-Given a string `s`, find the character that occurs the maximum number of times.
-
-Return the character with the highest frequency.
-If multiple characters have the same maximum frequency, return the character that appears **first in the string**.
+Given a string `s`, return the character that appears the most number of times. If multiple characters share the same highest frequency, return the one that appears **first in the string**.
 
 ---
 
@@ -16,8 +13,8 @@ If multiple characters have the same maximum frequency, return the character tha
 Input:  s = "hello"
 Output: 'l'
 
-h → 1, e → 1, l → 2, o → 1
-l occurs the most.
+h→1  e→1  l→2  o→1
+l appears the most.
 ```
 
 **Example 2**
@@ -25,8 +22,8 @@ l occurs the most.
 Input:  s = "banana"
 Output: 'a'
 
-b → 1, a → 3, n → 2
-a occurs the most.
+b→1  a→3  n→2
+a appears the most.
 ```
 
 **Example 3 — Tie**
@@ -34,8 +31,8 @@ a occurs the most.
 Input:  s = "aabbcc"
 Output: 'a'
 
-a → 2, b → 2, c → 2
-All tied — a appears first in the string, so return a.
+a→2  b→2  c→2
+All tied — return the one that appears first, which is 'a'.
 ```
 
 ---
@@ -43,7 +40,7 @@ All tied — a appears first in the string, so return a.
 ## Constraints
 
 - `1 <= s.length <= 1000`
-- `s` contains lowercase English letters only
+- `s` contains only lowercase English letters
 - On a tie, return the character that appears first in the string
 
 ---
