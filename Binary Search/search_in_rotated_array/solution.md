@@ -1,32 +1,30 @@
-> **Trick:** Find the pivot (index of the largest element) first. That splits the array into two clean sorted halves. Then decide which half K lives in and run a standard binary search on just that half.
+> **Trick:** Find the index of the minimum element — that's the pivot, the exact start of the right sorted half. Then compare K with arr[0] to pick which half to binary search. This reuses the findMin logic from `find_minimum_rotated_array` almost unchanged.
 
 ## Approach
 
-Three steps:
-1. Binary search for the pivot — the point where `arr[pivot] > arr[pivot+1]`
-2. Compare K with `arr[0]` to pick the correct half
-3. Binary search on that half
+`findMinIndex` returns the index of the smallest element, which splits the array into two sorted halves. Then decide which half K belongs to and run standard binary search on it.
 
 ## Code
 
 ```cpp
 class Solution {
 public:
-    int findPivot(vector<int>& arr, int n) {
+    // same logic as find_minimum_rotated_array — returns index instead of value
+    int findMinIndex(vector<int>& arr, int n) {
         int s = 0, e = n - 1;
         while (s <= e) {
+            // window is already sorted — minimum is at the left end
+            if (arr[s] <= arr[e])
+                return s;
             int m = s + (e - s) / 2;
-            // found the dip — this is the pivot
-            if (m < n - 1 && arr[m] > arr[m + 1])
-                return m;
-            // mid is in the left (larger) half — pivot is further right
+            // mid is in the left (larger) half — minimum is to the right
             if (arr[m] >= arr[0])
                 s = m + 1;
-            // mid is in the right (smaller) half — pivot is to the left
+            // mid is in the right (smaller) half — minimum is at m or to its left
             else
-                e = m - 1;
+                e = m;
         }
-        return -1; // no rotation, array is already sorted
+        return 0;
     }
 
     int binarySearch(vector<int>& arr, int s, int e, int key) {
@@ -40,18 +38,18 @@ public:
     }
 
     int findPosition(vector<int>& arr, int n, int k) {
-        int pivot = findPivot(arr, n);
+        int pivot = findMinIndex(arr, n); // pivot = start of right sorted half
 
-        // no rotation — search the whole array
-        if (pivot == -1)
+        // pivot = 0 means no rotation — search the whole array
+        if (pivot == 0)
             return binarySearch(arr, 0, n - 1, k);
 
-        // k >= arr[0] means k is in the left sorted half
+        // k >= arr[0] means k belongs to the left sorted half
         if (k >= arr[0])
-            return binarySearch(arr, 0, pivot, k);
+            return binarySearch(arr, 0, pivot - 1, k);
 
-        // otherwise k is in the right sorted half
-        return binarySearch(arr, pivot + 1, n - 1, k);
+        // otherwise k is in the right sorted half (starts at pivot)
+        return binarySearch(arr, pivot, n - 1, k);
     }
 };
 ```
@@ -61,32 +59,38 @@ public:
 Input: `arr = [7, 8, 1, 3, 5]`, `k = 3`
 
 ```
-findPivot:
-  s=0, e=4  m=2  arr[2]=1, arr[3]=3  →  1 < 3, no dip. arr[2]=1 < arr[0]=7 → e=1
-  s=0, e=1  m=0  arr[0]=7, arr[1]=8  →  7 < 8, no dip. arr[0]=7 >= arr[0]=7 → s=1
-  s=1, e=1  m=1  arr[1]=8, arr[2]=1  →  8 > 1, dip found! return 1
+findMinIndex:
+  s=0, e=4  arr[0]=7 > arr[4]=5 → not sorted
+  m=2  arr[2]=1 < arr[0]=7 → right half → e=2
 
-pivot = 1
+  s=0, e=2  arr[0]=7 > arr[2]=1 → not sorted
+  m=1  arr[1]=8 >= arr[0]=7 → left half → s=2
 
-k=3, arr[0]=7  →  3 < 7, search right half: indices 2 to 4
+  s=2, e=2  arr[2]=1 <= arr[2]=1 → sorted → return 2
 
+pivot = 2
+
+k=3, arr[0]=7 → 3 < 7 → search right half: indices 2..4
 binarySearch(arr, 2, 4, 3):
-  s=2, e=4  m=3  arr[3]=3 == 3  →  return 3 ✓
+  m=3  arr[3]=3 == 3 → return 3 ✓
 ```
 
 Input: `arr = [1, 3, 5, 7, 8]`, `k = 5` (no rotation)
 
 ```
-findPivot: no dip found → returns -1
-binarySearch(arr, 0, 4, 5) → finds 5 at index 2 ✓
+findMinIndex:
+  s=0, e=4  arr[0]=1 <= arr[4]=8 → sorted → return 0
+
+pivot = 0 → search whole array
+binarySearch(arr, 0, 4, 5) → return 2 ✓
 ```
 
 ## Complexity
 
-**Time:** O(log n) — finding the pivot is O(log n), binary search on the half is O(log n), total still O(log n).
+**Time:** O(log n) — findMinIndex is O(log n), binary search on the half is O(log n).
 
 **Space:** O(1) — only index variables.
 
 ## Key Pattern
 
-When a problem involves a rotated sorted array, finding the pivot first is a clean strategy — it reduces the problem back to standard binary search. The pivot tells you exactly where one sorted half ends and the other begins.
+The minimum element in a rotated sorted array is always the exact boundary between the two sorted halves. Finding it once gives you everything you need to reduce the search to a standard binary search — no special casing needed mid-search.

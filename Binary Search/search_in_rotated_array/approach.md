@@ -1,40 +1,35 @@
-# Approach — Find Pivot, Then Binary Search
+# Approach — Find Minimum (Pivot), Then Binary Search
 
 ## The core idea
 
-A rotated sorted array is made of two sorted halves joined at a pivot. If we know where the pivot is, we know exactly which half the key belongs to — and then it's just a plain binary search on that half.
+A rotated sorted array is made of two sorted halves. The **minimum element** is exactly where the right half begins — it's the pivot point. If we find its index, we know both halves perfectly, and searching becomes a plain binary search on whichever half contains K.
 
 ```
 [7, 8, 1, 3, 5]
- ↑  ↑           ← left sorted half (7, 8)
-       ↑  ↑  ↑  ← right sorted half (1, 3, 5)
-    pivot = index 1 (value 8, the largest element)
+ ↑  ↑           ← left sorted half  (indices 0..1)
+       ↑  ↑  ↑  ← right sorted half (indices 2..4)
+       ^
+    minimum = index 2 → this IS the pivot
 ```
 
-## Step 1 — Find the pivot
+> This reuses the exact same logic from `find_minimum_rotated_array`. The `findMinIndex` function is identical — we're just using its result differently here (to split the array for search instead of returning the value).
 
-The pivot is the index of the **largest element** — the point where the array "dips" (where `arr[pivot] > arr[pivot+1]`).
+## Step 1 — Find the index of the minimum (pivot)
 
-We find it with binary search:
-- If `arr[mid] >= arr[0]`, then `mid` is in the left (larger) sorted half → pivot is further right → `s = mid + 1`
-- Otherwise `mid` is in the right (smaller) half → pivot is at `mid` or to its left → `e = mid - 1`
-- If `arr[mid] > arr[mid+1]`, we found the pivot directly → return `mid`
-- If no dip is ever found, the array isn't rotated at all → return `-1`
+Same binary search as find_minimum_rotated_array:
+- If the current window is already sorted (`arr[s] <= arr[e]`), minimum is at `s` — return immediately
+- If `arr[mid] >= arr[0]`, mid is in the left (larger) half → minimum is further right → `s = mid + 1`
+- Otherwise mid is in the right (smaller) half → minimum is at mid or left → `e = mid`
 
-## Step 2 — Decide which half to search
+## Step 2 — Decide which half K is in
 
-Once we have the pivot index:
-- Left half: indices `0` to `pivot`
-- Right half: indices `pivot+1` to `n-1`
+- Left half: indices `0` to `pivot - 1`
+- Right half: indices `pivot` to `n - 1`
 
-To decide which half K is in:
-- If `K >= arr[0]`, K is in the left half (since left half starts at arr[0])
+To pick the right half:
+- If `K >= arr[0]`, K is in the left half (left half contains the larger values starting at arr[0])
 - Otherwise K is in the right half
 
-## Step 3 — Standard binary search
+If pivot = 0, the array isn't rotated — search the whole thing.
 
-Run a normal binary search on whichever half was chosen. If the array wasn't rotated (pivot = -1), just search the whole array.
-
-## Why this works
-
-Splitting at the pivot gives us two clean sorted subarrays. Binary search requires a sorted input — once we isolate the right half, we're back to the standard problem.
+## Step 3 — Standard binary search on the chosen half
